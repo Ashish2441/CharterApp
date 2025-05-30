@@ -20,6 +20,8 @@
 ```bash
 npm test
 ```
+## Test report
+![image](https://github.com/user-attachments/assets/b67199b0-55e6-4d29-8263-095995dd75f6)
 
 ## Project Structure
 
