@@ -33,6 +33,11 @@ const CustomerTable = ({ data, selectedMonth, selectedYear }) => {
     setCurrentPage(1);
   }, [selectedMonth, selectedYear]);
 
+  // Collapse rows on page change
+  useEffect(() => {
+    setExpandedRows({});
+  }, [currentPage]);
+
   const filteredData = data.filter((tx) => {
     const date = new Date(tx.date);
     const txMonth = date.getMonth() + ONE;
