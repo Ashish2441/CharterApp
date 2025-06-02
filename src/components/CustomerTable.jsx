@@ -24,6 +24,7 @@ import {
   OF,
   COLOUMN_SPAN_FOUR,
 } from "../data/constant";
+import { currentYear } from "../util/daysCalculaion";
 
 const CustomerTable = ({ data, selectedMonth, selectedYear }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -44,9 +45,11 @@ const CustomerTable = ({ data, selectedMonth, selectedYear }) => {
       const date = new Date(tx.date);
       const txMonth = date.getMonth() + ONE;
       const txYear = date.getFullYear();
-
+      const today = new Date();
+      if (!selectedMonth && selectedYear !== currentYear) {
+        return date <= today && txYear === parseInt(selectedYear);
+      }
       if (!selectedMonth || selectedMonth === LAST_THREE) {
-        const today = new Date();
         const threeMonthsAgo = new Date(
           today.getFullYear(),
           today.getMonth() - TWO,
