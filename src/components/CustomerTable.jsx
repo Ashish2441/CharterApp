@@ -45,10 +45,19 @@ const CustomerTable = ({ data, selectedMonth, selectedYear }) => {
       const txMonth = date.getMonth() + ONE;
       const txYear = date.getFullYear();
 
-      if (!selectedYear) return false;
-
       if (!selectedMonth || selectedMonth === LAST_THREE) {
-        return txYear === parseInt(selectedYear);
+        const today = new Date();
+        const threeMonthsAgo = new Date(
+          today.getFullYear(),
+          today.getMonth() - TWO,
+          ONE
+        );
+
+        return (
+          date >= threeMonthsAgo &&
+          date <= today &&
+          txYear === parseInt(selectedYear)
+        );
       }
 
       return (

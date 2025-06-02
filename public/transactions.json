@@ -6,6 +6,18 @@
     "date": "2025-05-01"
   },
   {
+    "customerId": "C025",
+    "transactionId": "T028",
+    "amount": 120,
+    "date": "2025-05-21"
+  },
+  {
+    "customerId": "C028",
+    "transactionId": "T030",
+    "amount": 120,
+    "date": "2025-05-25"
+  },
+  {
     "customerId": "C001",
     "transactionId": "T025",
     "amount": 90,
