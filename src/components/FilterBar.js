@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import {
   LAST_THREE_MONTH,
   SELECT_MONTH,
@@ -5,6 +6,7 @@ import {
   ONE,
 } from "../data/constant";
 import { currentYear, lastFiveYears, months } from "../util/daysCalculaion";
+import { classes } from "../styles/classMap";
 
 const FilterBar = ({
   selectedMonth,
@@ -13,9 +15,9 @@ const FilterBar = ({
   onYearChange,
 }) => {
   return (
-    <div className="flex flex-wrap gap-4 justify-center mb-6">
+    <div className={classes.filterBar}>
       <select
-        className="px-4 py-2 border rounded"
+        className={classes.select}
         value={selectedMonth}
         onChange={(e) => onMonthChange(e.target.value)}
       >
@@ -32,7 +34,7 @@ const FilterBar = ({
       </select>
 
       <select
-        className="px-4 py-2 border rounded"
+        className={classes.select}
         value={selectedYear}
         onChange={(e) => onYearChange(Number(e.target.value))}
       >
@@ -44,6 +46,13 @@ const FilterBar = ({
       </select>
     </div>
   );
+};
+
+FilterBar.propTypes = {
+  selectedMonth: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  selectedYear: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  onMonthChange: PropTypes.func.isRequired,
+  onYearChange: PropTypes.func.isRequired,
 };
 
 export default FilterBar;

@@ -25,3 +25,4 @@ export const NEXT = "Next";
 export const PAGE = "Page";
 export const OF = "of";
 export const EMPTY_STRING = "";
+export const COLOUMN_SPAN_FOUR = "4";

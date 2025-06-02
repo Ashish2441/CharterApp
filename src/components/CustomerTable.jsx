@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import PropTypes from "prop-types";
 import { calculatePoints } from "../util/rewardCalculation";
+import { classes } from "../styles/classMap";
 import {
   NO_TRANSACTIONS,
   CUSTOMER_ID,
@@ -20,6 +22,7 @@ import {
   NEXT,
   PAGE,
   OF,
+  COLOUMN_SPAN_FOUR,
 } from "../data/constant";
 
 const CustomerTable = ({ data, selectedMonth, selectedYear }) => {
@@ -27,162 +30,160 @@ const CustomerTable = ({ data, selectedMonth, selectedYear }) => {
   const recordsPerPage = FIVE;
   const [expandedRows, setExpandedRows] = useState({});
 
-  // Reset expanded rows when filters change
   useEffect(() => {
     setExpandedRows({});
     setCurrentPage(1);
   }, [selectedMonth, selectedYear]);
 
-  // Collapse rows on page change
   useEffect(() => {
     setExpandedRows({});
   }, [currentPage]);
 
-  const filteredData = data.filter((tx) => {
-    const date = new Date(tx.date);
-    const txMonth = date.getMonth() + ONE;
-    const txYear = date.getFullYear();
+  const filteredData = useMemo(() => {
+    return data.filter((tx) => {
+      const date = new Date(tx.date);
+      const txMonth = date.getMonth() + ONE;
+      const txYear = date.getFullYear();
 
-    if (!selectedMonth || selectedMonth === LAST_THREE) {
-      const today = new Date();
-      const threeMonthsAgo = new Date(
-        today.getFullYear(),
-        today.getMonth() - TWO,
-        ONE
-      );
+      if (!selectedYear) return false;
+
+      if (!selectedMonth || selectedMonth === LAST_THREE) {
+        return txYear === parseInt(selectedYear);
+      }
+
       return (
-        date >= threeMonthsAgo &&
-        date <= today &&
-        txYear === parseInt(selectedYear)
+        txMonth === parseInt(selectedMonth) && txYear === parseInt(selectedYear)
       );
-    }
-
-    return (
-      txMonth === parseInt(selectedMonth) && txYear === parseInt(selectedYear)
-    );
-  });
-  const customerMap = {};
-  filteredData.forEach((tx) => {
-    const { customerId, amount, date, transactionId } = tx;
-    const points = calculatePoints(amount);
-    const month = new Date(date).toLocaleString(DEFAULT, { month: LONG });
-
-    if (!customerMap[customerId]) {
-      customerMap[customerId] = {
-        total: ZERO,
-        monthly: {},
-        purchases: {},
-        transactions: {},
-      };
-    }
-    customerMap[customerId].total += points;
-    customerMap[customerId].monthly[month] =
-      (customerMap[customerId].monthly[month] || ZERO) + points;
-    customerMap[customerId].purchases[month] =
-      (customerMap[customerId].purchases[month] || ZERO) + amount;
-
-    if (!customerMap[customerId].transactions[month]) {
-      customerMap[customerId].transactions[month] = [];
-    }
-    customerMap[customerId].transactions[month].push({
-      amount,
-      points,
-      date,
-      transactionId,
     });
-  });
-  const customers = Object.entries(customerMap);
-  const totalPages = Math.ceil(customers.length / recordsPerPage);
-  const paginatedCustomers = customers.slice(
-    (currentPage - ONE) * recordsPerPage,
-    currentPage * recordsPerPage
-  );
-  const toggleRow = (customerId) => {
+  }, [data, selectedMonth, selectedYear]);
+
+  const customerMap = useMemo(() => {
+    const map = {};
+    filteredData.forEach((tx) => {
+      const { customerId, amount, date, transactionId } = tx;
+      const points = calculatePoints(amount);
+      const month = new Date(date).toLocaleString(DEFAULT, { month: LONG });
+
+      if (!map[customerId]) {
+        map[customerId] = {
+          total: ZERO,
+          monthly: {},
+          purchases: {},
+          transactions: {},
+        };
+      }
+      map[customerId].total += points;
+      map[customerId].monthly[month] =
+        (map[customerId].monthly[month] || ZERO) + points;
+      map[customerId].purchases[month] =
+        (map[customerId].purchases[month] || ZERO) + amount;
+
+      if (!map[customerId].transactions[month]) {
+        map[customerId].transactions[month] = [];
+      }
+      map[customerId].transactions[month].push({
+        amount,
+        points,
+        date,
+        transactionId,
+      });
+    });
+    return map;
+  }, [filteredData]);
+
+  const customers = useMemo(() => Object.entries(customerMap), [customerMap]);
+
+  const paginatedCustomers = useMemo(() => {
+    return customers.slice(
+      (currentPage - ONE) * recordsPerPage,
+      currentPage * recordsPerPage
+    );
+  }, [customers, currentPage, recordsPerPage]);
+
+  const toggleRow = useCallback((customerId) => {
     setExpandedRows((prev) => ({
       ...prev,
       [customerId]: !prev[customerId],
     }));
-  };
+  }, []);
 
   return (
-    <div className="bg-white shadow-md rounded p-4">
-      {customers.length === ZERO ? (
-        <p className="text-center text-gray-500">{NO_TRANSACTIONS}</p>
-      ) : (
+    <div className={classes.container}>
+      {customers.length === ZERO && (
+        <p className={classes.noDataText}>{NO_TRANSACTIONS}</p>
+      )}
+      {customers.length !== ZERO && (
         <>
-          <table className="w-full text-left border border-gray-300">
+          <table className={classes.table}>
             <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-gray-300 p-2">{CUSTOMER_ID}</th>
-                <th className="border border-gray-300 p-2">
-                  {PURCHASE_AMOUNT}
-                </th>
-                <th className="border border-gray-300 p-2">{MONTHLY_POINTS}</th>
-                <th className="border border-gray-300 p-2">{TOTAL_POINTS}</th>
+              <tr className={classes.theadRow}>
+                <th className={classes.th}>{CUSTOMER_ID}</th>
+                <th className={classes.th}>{PURCHASE_AMOUNT}</th>
+                <th className={classes.th}>{MONTHLY_POINTS}</th>
+                <th className={classes.th}>{TOTAL_POINTS}</th>
               </tr>
             </thead>
             <tbody>
               {paginatedCustomers.map(([id, data]) => (
                 <React.Fragment key={id}>
-                  <tr className="hover:bg-gray-50">
-                    <td className="border border-gray-300 p-2 font-semibold flex items-center gap-2">
+                  <tr className={classes.tr}>
+                    <td className={`${classes.td} ${classes.customerIdCell}`}>
                       <button
                         onClick={() => toggleRow(id)}
-                        className="text-indigo-600 font-bold"
+                        className={classes.button}
                       >
                         {expandedRows[id] ? "➖" : "➕"}
                       </button>
                       {id}
                     </td>
-                    <td className="border border-gray-300 p-2">
+                    <td className={classes.td}>
                       {Object.entries(data.purchases).map(([month, amt]) => (
                         <div key={month}>
                           {`${month}: `}
-                          <span className="text-green-600 font-medium">
+                          <span className={classes.amountText}>
                             ${amt.toFixed(2)}
                           </span>
                         </div>
                       ))}
                     </td>
-                    <td className="border border-gray-300 p-2">
+                    <td className={classes.td}>
                       {Object.entries(data.monthly).map(([month, pts]) => (
                         <div key={month}>
                           {`${month}: `}
-                          <span className="font-medium text-indigo-600">
-                            {pts}
-                          </span>
+                          <span className={classes.pointsText}>{pts}</span>
                         </div>
                       ))}
                     </td>
-                    <td className="border border-gray-300 p-2 font-semibold">
+                    <td className={`${classes.td} ${classes.totalPoints}`}>
                       {data.total}
                     </td>
                   </tr>
-
-                  {/* Transaction details row */}
                   {expandedRows[id] && (
                     <tr>
                       <td
-                        colSpan="4"
-                        className="bg-gray-50 p-4 text-sm text-gray-700"
+                        colSpan={COLOUMN_SPAN_FOUR}
+                        className={classes.transactionsCell}
                       >
                         {Object.entries(data.transactions).map(
                           ([month, txList]) => (
-                            <div key={month} className="mb-2">
-                              <div className="font-semibold mb-1">
+                            <div
+                              key={month}
+                              className={classes.transactionGroup}
+                            >
+                              <div className={classes.transactionLabel}>
                                 {`${month} ${TRANSACTIONS}`}:
                               </div>
-                              <ul className="list-disc list-inside ml-4">
-                                {txList.map((tx, index) => (
-                                  <li key={index}>
+                              <ul className={classes.transactionList}>
+                                {txList.map((tx) => (
+                                  <li key={tx.transactionId}>
                                     {`${new Date(
                                       tx.date
                                     ).toLocaleDateString()} → 
-                                    ${TRANSACTION_ID}: ${tx.transactionId} → 
-                                    ${PURCHASE_AMOUNT}: ${tx.amount.toFixed(
+                                  ${TRANSACTION_ID}: ${tx.transactionId} → 
+                                  ${PURCHASE_AMOUNT}: ${tx.amount.toFixed(
                                       TWO
                                     )} →
-                                    ${POINTS}: ${tx.points}`}
+                                  ${POINTS}: ${tx.points}`}
                                   </li>
                                 ))}
                               </ul>
@@ -196,36 +197,47 @@ const CustomerTable = ({ data, selectedMonth, selectedYear }) => {
               ))}
             </tbody>
           </table>
-
-          <div className="mt-4 flex justify-center gap-2">
+          <div className={classes.paginationWrapper}>
             <button
-              className="px-3 py-1 bg-indigo-600 text-white rounded disabled:opacity-50"
+              className={classes.paginationButton}
               onClick={() =>
                 setCurrentPage((prev) => Math.max(prev - ONE, ONE))
               }
               disabled={currentPage === ONE}
             >
-              {`${PREVEIOUS}`}
+              {PREVEIOUS}
             </button>
-            <span className="px-3 py-1 text-gray-700 font-medium">
-              {`${PAGE} ${currentPage} ${OF} ${totalPages}`}
+            <span className={classes.paginationText}>
+              {`${PAGE} ${currentPage} ${OF} ${Math.ceil(
+                customers.length / recordsPerPage
+              )}`}
             </span>
             <button
-              className="px-3 py-1 bg-indigo-600 text-white rounded disabled:opacity-50"
+              className={classes.paginationButton}
               onClick={() =>
                 setCurrentPage((prev) =>
-                  prev < totalPages ? prev + ONE : prev
+                  prev < Math.ceil(customers.length / recordsPerPage)
+                    ? prev + ONE
+                    : prev
                 )
               }
-              disabled={currentPage === totalPages}
+              disabled={
+                currentPage === Math.ceil(customers.length / recordsPerPage)
+              }
             >
-              {`${NEXT}`}
+              {NEXT}
             </button>
           </div>
         </>
       )}
     </div>
   );
+};
+
+CustomerTable.propTypes = {
+  data: PropTypes.array.isRequired,
+  selectedMonth: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  selectedYear: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };
 
 export default CustomerTable;
