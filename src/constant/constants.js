@@ -28,3 +28,6 @@ export const PAGE = "Page";
 export const OF = "of";
 export const EMPTY_STRING = "";
 export const COLOUMN_SPAN_FOUR = "4";
+export const TRANSACTIONS_QUERY_KEY = "transactions";
+export const TRANSACTION_LOADED = "Transactions loaded!";
+export const TRANSACTION_LOADING_FAILED = "Failed to fetch transactions";

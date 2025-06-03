@@ -1,4 +1,3 @@
-import React from "react";
 import PropTypes from "prop-types";
 import { TRANSACTIONS, TRANSACTION_ID, PURCHASE_AMOUNT, POINTS, TWO, COLOUMN_SPAN_FOUR } from "../constant/constants";
 import { classes } from "../styles/CustomerTable";
