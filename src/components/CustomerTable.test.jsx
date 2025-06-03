@@ -1,4 +1,3 @@
-import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import CustomerTable from "./CustomerTable";
 import "@testing-library/jest-dom";
@@ -41,47 +40,33 @@ describe("CustomerTable Component", () => {
   });
 
   it("renders customer rows", () => {
-    render(
-      <CustomerTable
-        data={sampleData}
-        selectedMonth=""
-        selectedYear={new Date().getFullYear()}
-      />
-    );
+    render(<CustomerTable data={sampleData} selectedMonth="" selectedYear={new Date().getFullYear()} />);
     expect(screen.getByText("C1")).toBeInTheDocument();
     expect(screen.getByText("C2")).toBeInTheDocument();
     expect(screen.getByText(/Total Points/i)).toBeInTheDocument();
   });
 
   it("shows monthly points and purchase amount", () => {
-    render(
-      <CustomerTable
-        data={sampleData}
-        selectedMonth=""
-        selectedYear={new Date().getFullYear()}
-      />
-    );
+    render(<CustomerTable data={sampleData} selectedMonth="" selectedYear={new Date().getFullYear()} />);
 
     // Monthly details for purchase and points should be visible
     expect(screen.getByText(/Purchase Amount/i)).toBeInTheDocument();
     expect(screen.getByText(/Monthly Points/i)).toBeInTheDocument();
   });
 
-  it("expands transaction list when ➕ is clicked", () => {
-    render(
-      <CustomerTable
-        data={sampleData}
-        selectedMonth=""
-        selectedYear={new Date().getFullYear()}
-      />
-    );
+  it("expands transaction list when ➕ is clicked", async () => {
+    render(<CustomerTable data={sampleData} selectedMonth="" selectedYear={new Date().getFullYear()} />);
 
     const expandButton = screen.getAllByText("➕")[0];
     fireEvent.click(expandButton);
 
-    expect(screen.getByText(/Transactions:/i)).toBeInTheDocument();
-    expect(screen.getByText(/TXN1/)).toBeInTheDocument();
-    expect(screen.getByText(/TXN2/)).toBeInTheDocument();
+    // Wait for transaction details to appear using data-testid
+    const month = new Date().toLocaleString("default", { month: "long" }); // same logic as in useCustomerData
+    const testId = `transactions-${month}`;
+
+    expect(await screen.findByTestId(testId)).toBeInTheDocument();
+    expect(await screen.findByText(/TXN1/)).toBeInTheDocument();
+    expect(await screen.findByText(/TXN2/)).toBeInTheDocument();
   });
 
   it("paginates results", () => {
@@ -92,13 +77,7 @@ describe("CustomerTable Component", () => {
       transactionId: `TXN${i + 1}`,
     }));
 
-    render(
-      <CustomerTable
-        data={bigData}
-        selectedMonth=""
-        selectedYear={new Date().getFullYear()}
-      />
-    );
+    render(<CustomerTable data={bigData} selectedMonth="" selectedYear={new Date().getFullYear()} />);
 
     // Page 1: show first 5 customers
     for (let i = 1; i <= 5; i++) {

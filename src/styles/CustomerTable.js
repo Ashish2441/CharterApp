@@ -14,8 +14,7 @@ export const classes = {
   pointsText: "font-medium text-indigo-600",
   totalPoints: "font-semibold",
   transactionsCell: "bg-gray-50 p-4 text-sm text-gray-700",
-  paginationButton:
-    "px-3 py-1 bg-indigo-600 text-white rounded disabled:opacity-50",
+  paginationButton: "px-3 py-1 bg-indigo-600 text-white rounded disabled:opacity-50",
   paginationText: "px-3 py-1 text-gray-700 font-medium",
   filterBar: "flex flex-wrap gap-4 justify-center mb-6",
   select: "px-4 py-2 border rounded",

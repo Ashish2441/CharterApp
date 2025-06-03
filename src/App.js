@@ -1,20 +1,14 @@
 import React, { useCallback } from "react";
 import CustomerTable from "./components/CustomerTable";
 import FilterBar from "./components/FilterBar";
-import {
-  CUSTOMER_REWARD_DASHBOARD,
-  EMPTY_STRING,
-  LOADING,
-} from "./data/constant";
-import { useTransactions } from "./api/hooks/useTransactions";
-import { classes } from "./styles/classMap";
+import { CUSTOMER_REWARD_DASHBOARD, EMPTY_STRING, LOADING } from "./constant/constants";
+import { useTransactions } from "./api/useTransactions";
+import { classes } from "./styles/CustomerTable";
 
 function App() {
   const { transactions, loading, error } = useTransactions();
   const [selectedMonth, setSelectedMonth] = React.useState(EMPTY_STRING);
-  const [selectedYear, setSelectedYear] = React.useState(
-    new Date().getFullYear()
-  );
+  const [selectedYear, setSelectedYear] = React.useState(new Date().getFullYear());
 
   const handleMonthChange = useCallback((month) => {
     setSelectedMonth(month);
@@ -27,21 +21,10 @@ function App() {
   return (
     <div className={classes.appWrapper}>
       <h1 className={classes.appHeading}>{CUSTOMER_REWARD_DASHBOARD}</h1>
-      <FilterBar
-        selectedMonth={selectedMonth}
-        selectedYear={selectedYear}
-        onMonthChange={handleMonthChange}
-        onYearChange={handleYearChange}
-      />
+      <FilterBar selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={handleMonthChange} onYearChange={handleYearChange} />
       {loading && <p>{LOADING}</p>}
       {error && <p className={classes.errorText}>{error}</p>}
-      {!loading && !error && (
-        <CustomerTable
-          data={transactions}
-          selectedMonth={selectedMonth}
-          selectedYear={selectedYear}
-        />
-      )}
+      {!loading && !error && <CustomerTable data={transactions} selectedMonth={selectedMonth} selectedYear={selectedYear} />}
     </div>
   );
 }

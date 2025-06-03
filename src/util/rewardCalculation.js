@@ -1,5 +1,7 @@
+import { FIFTY, HUNDRED, TWO, ZERO } from "../constant/constants";
+
 export const calculatePoints = (amount) => {
-  if (amount <= 50) return 0;
-  if (amount <= 100) return amount - 50;
-  return 50 + (amount - 100) * 2;
+  if (amount <= FIFTY) return ZERO;
+  if (amount <= HUNDRED) return amount - FIFTY;
+  return FIFTY + (amount - HUNDRED) * TWO;
 };

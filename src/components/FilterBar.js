@@ -1,46 +1,25 @@
 import PropTypes from "prop-types";
-import {
-  LAST_THREE_MONTH,
-  SELECT_MONTH,
-  EMPTY_STRING,
-  ONE,
-} from "../data/constant";
-import { currentYear, lastFiveYears, months } from "../util/daysCalculaion";
-import { classes } from "../styles/classMap";
+import { LAST_THREE_MONTH, SELECT_MONTH, EMPTY_STRING, ONE } from "../constant/constants";
+import { currentYear, lastFiveYears, months } from "../util/daysCalculation";
+import { classes } from "../styles/CustomerTable";
 
-const FilterBar = ({
-  selectedMonth,
-  selectedYear,
-  onMonthChange,
-  onYearChange,
-}) => {
+const FilterBar = ({ selectedMonth, selectedYear, onMonthChange, onYearChange }) => {
   return (
     <div className={classes.filterBar}>
-      <select
-        className={classes.select}
-        value={selectedMonth}
-        onChange={(e) => onMonthChange(e.target.value)}
-      >
-        {selectedYear === currentYear ? (
-          <option value={`${EMPTY_STRING}`}>{LAST_THREE_MONTH}</option>
-        ) : (
-          <option value={`${EMPTY_STRING}`}>{SELECT_MONTH}</option>
-        )}
-        {months.map((m, i) => (
-          <option key={i} value={i + ONE}>
-            {m}
+      <select className={classes.select} value={selectedMonth} onChange={(e) => onMonthChange(e.target.value)}>
+        {selectedYear === currentYear && <option value={`${EMPTY_STRING}`}>{LAST_THREE_MONTH}</option>}
+        {selectedYear !== currentYear && <option value={`${EMPTY_STRING}`}>{SELECT_MONTH}</option>}
+        {months.map((month, index) => (
+          <option key={index} value={index + ONE}>
+            {month}
           </option>
         ))}
       </select>
 
-      <select
-        className={classes.select}
-        value={selectedYear}
-        onChange={(e) => onYearChange(Number(e.target.value))}
-      >
-        {lastFiveYears.map((y) => (
-          <option key={y} value={y}>
-            {y}
+      <select className={classes.select} value={selectedYear} onChange={(e) => onYearChange(Number(e.target.value))}>
+        {lastFiveYears.map((year) => (
+          <option key={year} value={year}>
+            {year}
           </option>
         ))}
       </select>
