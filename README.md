@@ -55,3 +55,19 @@ npm test
 - `components/CustomerTable.jsx`: component having logic and jsx part
 - `components/TransactionDetails.jsx`: transaction details logic
 - `components/FilterBar.js`: component having months and year logic for dropdown
+
+## IMP NOTE :  we have used React-query for api call instead of useEffect below is main diffrence
+useEffect + fetch is like building everything manually: you fetch data, manage loading and error states, and update your state. It gives full control but requires more boilerplate.
+
+useQuery, on the other hand, is a powerful abstraction from React Query that automatically handles loading, error, caching, and background refetching for you. It makes data-fetching declarative, efficient, and easier to manage, especially in apps with shared or frequently-changing data.
+
+## React query and react toast for logging:
+React Query (@tanstack/react-query)
+React Query is a powerful data-fetching library for managing server state in React applications. It simplifies API requests with built-in caching, background updates, and automatic re-fetching.
+
+React Hot Toast (react-hot-toast)
+React Hot Toast provides lightweight and customizable toast notifications for React apps. It's used to show success, error, and loading messages in a user-friendly way.
+
+
+
+
