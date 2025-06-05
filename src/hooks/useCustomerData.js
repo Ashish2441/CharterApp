@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { calculatePoints } from "../util/rewardCalculation";
-import { ONE, TWO, ZERO, DEFAULT, LONG, LAST_THREE } from "../constant/constants";
+import { ONE, ZERO, DEFAULT, LONG, LAST_THREE, THREE } from "../constant/constants";
 import { currentYear } from "../util/daysCalculation";
 
 export function useCustomerData(data, selectedMonth, selectedYear) {
@@ -14,7 +14,7 @@ export function useCustomerData(data, selectedMonth, selectedYear) {
         return date <= today && txYear === parseInt(selectedYear);
       }
       if (!selectedMonth || selectedMonth === LAST_THREE) {
-        const threeMonthsAgo = new Date(today.getFullYear(), today.getMonth() - TWO, ONE);
+        const threeMonthsAgo = new Date(today.getFullYear(), today.getMonth() - THREE);
         return date >= threeMonthsAgo && date <= today && txYear === parseInt(selectedYear);
       }
       return txMonth === parseInt(selectedMonth) && txYear === parseInt(selectedYear);

@@ -15,6 +15,7 @@ export const SHORT = "short";
 export const FIVE = 5;
 export const ONE = 1;
 export const TWO = 2;
+export const THREE = 3;
 export const TWELVE = 12;
 export const ZERO = 0;
 export const FIFTY = 50;
