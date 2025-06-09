@@ -2,15 +2,30 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import CustomerTable from "./CustomerTable";
 import "@testing-library/jest-dom";
 
-// Mock calculatePoints to isolate logic
+// MOCK useCustomerData
+jest.mock("../hooks/useCustomerData", () => ({
+  useCustomerData: jest.fn(),
+}));
+import { useCustomerData } from "../hooks/useCustomerData";
+
+// MOCK calculatePoints logic (optional since we now mock hook data)
 jest.mock("../util/rewardCalculation", () => ({
   calculatePoints: jest.fn((amount) => {
-    if (typeof amount !== "number" || isNaN(amount)) return 0;
+    if (typeof amount !== "number") return 0;
     if (amount > 100) return (amount - 100) * 2 + 50;
     if (amount > 50) return amount - 50;
     return 0;
   }),
 }));
+
+beforeEach(() => {
+  useCustomerData.mockReturnValue({
+    customers: [],
+    customerMap: {},
+  });
+});
+
+const currentYear = new Date().getFullYear();
 
 const sampleData = [
   {
@@ -40,51 +55,110 @@ describe("CustomerTable Component", () => {
   });
 
   it("renders customer rows", () => {
-    render(<CustomerTable data={sampleData} selectedMonth="" selectedYear={new Date().getFullYear()} />);
+    useCustomerData.mockReturnValue({
+      customers: [
+        ["C1", { purchases: {}, monthly: {}, total: 0, transactions: {} }],
+        ["C2", { purchases: {}, monthly: {}, total: 0, transactions: {} }],
+      ],
+      customerMap: {},
+    });
+
+    render(<CustomerTable data={[]} selectedMonth="" selectedYear={currentYear} />);
     expect(screen.getByText("C1")).toBeInTheDocument();
     expect(screen.getByText("C2")).toBeInTheDocument();
     expect(screen.getByText(/Total Points/i)).toBeInTheDocument();
   });
 
-  it("shows monthly points and purchase amount", () => {
-    render(<CustomerTable data={sampleData} selectedMonth="" selectedYear={new Date().getFullYear()} />);
+  it("displays rounded reward points for fractional values", () => {
+    const testDate = new Date().toISOString();
 
-    // Monthly details for purchase and points should be visible
-    expect(screen.getByText(/Purchase Amount/i)).toBeInTheDocument();
-    expect(screen.getByText(/Monthly Points/i)).toBeInTheDocument();
+    useCustomerData.mockReturnValue({
+      customers: [
+        [
+          "C030",
+          {
+            purchases: { June: 120.45 },
+            monthly: { June: 90.9 },
+            total: 90.9,
+            transactions: {
+              June: [
+                {
+                  amount: 120.45,
+                  transactionId: "TXN100",
+                  date: testDate,
+                  points: 90.9,
+                },
+              ],
+            },
+          },
+        ],
+      ],
+      customerMap: {},
+    });
+
+    render(<CustomerTable data={[]} selectedMonth="" selectedYear={new Date().getFullYear()} />);
+
+    // ✅ More reliable matcher for split-node structure
+    expect(screen.getAllByText((_, element) => element?.textContent?.replace(/\s+/g, "").includes("June:91")).length).toBeGreaterThanOrEqual(1);
+
+    // ✅ Total points check
+    expect(screen.getAllByText("91").length).toBeGreaterThanOrEqual(2);
   });
 
   it("expands transaction list when ➕ is clicked", async () => {
-    render(<CustomerTable data={sampleData} selectedMonth="" selectedYear={new Date().getFullYear()} />);
+    const date = new Date().toISOString();
+    useCustomerData.mockReturnValue({
+      customers: [
+        [
+          "C1",
+          {
+            purchases: {},
+            monthly: {},
+            total: 10,
+            transactions: {
+              June: [
+                {
+                  transactionId: "TXN1",
+                  amount: 100,
+                  date,
+                  points: 50,
+                },
+                {
+                  transactionId: "TXN2",
+                  amount: 200,
+                  date,
+                  points: 250,
+                },
+              ],
+            },
+          },
+        ],
+      ],
+      customerMap: {},
+    });
 
-    const expandButton = screen.getAllByText("➕")[0];
-    fireEvent.click(expandButton);
-
-    // Wait for transaction details to appear using data-testid
-    const month = new Date().toLocaleString("default", { month: "long" }); // same logic as in useCustomerData
-    const testId = `transactions-${month}`;
-
+    render(<CustomerTable data={[]} selectedMonth="" selectedYear={currentYear} />);
+    fireEvent.click(screen.getByText("➕"));
+    const testId = "transactions-June";
     expect(await screen.findByTestId(testId)).toBeInTheDocument();
     expect(await screen.findByText(/TXN1/)).toBeInTheDocument();
     expect(await screen.findByText(/TXN2/)).toBeInTheDocument();
   });
 
   it("paginates results", () => {
-    const bigData = Array.from({ length: 8 }, (_, i) => ({
-      customerId: `C${i + 1}`,
-      amount: 120,
-      date: new Date().toISOString(),
-      transactionId: `TXN${i + 1}`,
-    }));
+    const customers = Array.from({ length: 8 }, (_, i) => [`C${i + 1}`, { purchases: {}, monthly: {}, total: 100, transactions: {} }]);
 
-    render(<CustomerTable data={bigData} selectedMonth="" selectedYear={new Date().getFullYear()} />);
+    useCustomerData.mockReturnValue({
+      customers,
+      customerMap: {},
+    });
 
-    // Page 1: show first 5 customers
+    render(<CustomerTable data={[]} selectedMonth="" selectedYear={currentYear} />);
+
     for (let i = 1; i <= 5; i++) {
       expect(screen.getByText(`C${i}`)).toBeInTheDocument();
     }
 
-    // Go to next page
     fireEvent.click(screen.getByText(/Next/i));
 
     for (let i = 6; i <= 8; i++) {

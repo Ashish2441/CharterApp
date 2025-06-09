@@ -6,8 +6,8 @@ import { currentYear } from "../util/daysCalculation";
 export function useCustomerData(data, selectedMonth, selectedYear) {
   const filteredData = useMemo(() => {
     const today = new Date();
-    return data.filter((tx) => {
-      const date = new Date(tx.date);
+    return data.filter((transaction) => {
+      const date = new Date(transaction.date);
       const txMonth = date.getMonth() + ONE;
       const txYear = date.getFullYear();
       if (!selectedMonth && selectedYear !== currentYear) {

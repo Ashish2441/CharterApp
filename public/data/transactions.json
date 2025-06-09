@@ -160,5 +160,11 @@
     "transactionId": "T022",
     "amount": 60,
     "date": "2025-01-13"
+  },
+  {
+    "customerId": "C030",
+    "amount": 120.45,
+    "date": "2025-05-13",
+    "transactionId": "TXN100"
   }
 ]

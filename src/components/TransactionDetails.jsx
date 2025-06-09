@@ -16,7 +16,7 @@ const TransactionDetails = ({ transactions }) => {
                 {`${new Date(transaction.date).toLocaleDateString()} → 
                 ${TRANSACTION_ID}: ${transaction.transactionId} → 
                 ${PURCHASE_AMOUNT}: ${transaction.amount.toFixed(TWO)} → 
-                ${POINTS}: ${transaction.points}`}
+                ${POINTS}: ${Math.round(transaction.points)}`}
               </li>
             ))}
           </ul>

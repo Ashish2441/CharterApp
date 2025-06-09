@@ -79,11 +79,11 @@ const CustomerTable = ({ data, selectedMonth, selectedYear }) => {
                 <td className={classes.td}>
                   {Object.entries(data.monthly).map(([month, points]) => (
                     <div key={month}>
-                      {month}: <span className={classes.pointsText}>{points}</span>
+                      {month}: <span className={classes.pointsText}>{Math.round(Number(points) || ZERO)}</span>
                     </div>
                   ))}
                 </td>
-                <td className={`${classes.td} ${classes.totalPoints}`}>{data.total}</td>
+                <td className={`${classes.td} ${classes.totalPoints}`}>{Math.round(data.total || ZERO)}</td>
               </tr>
               {expandedRows[id] && (
                 <tr>
