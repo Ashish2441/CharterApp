@@ -7,16 +7,7 @@ jest.mock("../hooks/useCustomerData", () => ({
   useCustomerData: jest.fn(),
 }));
 import { useCustomerData } from "../hooks/useCustomerData";
-
-// MOCK calculatePoints logic (optional since we now mock hook data)
-jest.mock("../util/rewardCalculation", () => ({
-  calculatePoints: jest.fn((amount) => {
-    if (typeof amount !== "number") return 0;
-    if (amount > 100) return (amount - 100) * 2 + 50;
-    if (amount > 50) return amount - 50;
-    return 0;
-  }),
-}));
+import { calculatePoints } from "../util/rewardCalculation";
 
 beforeEach(() => {
   useCustomerData.mockReturnValue({
@@ -24,29 +15,7 @@ beforeEach(() => {
     customerMap: {},
   });
 });
-
 const currentYear = new Date().getFullYear();
-
-const sampleData = [
-  {
-    customerId: "C1",
-    amount: 120,
-    date: new Date().toISOString(),
-    transactionId: "TXN1",
-  },
-  {
-    customerId: "C1",
-    amount: 80,
-    date: new Date().toISOString(),
-    transactionId: "TXN2",
-  },
-  {
-    customerId: "C2",
-    amount: 45,
-    date: new Date().toISOString(),
-    transactionId: "TXN3",
-  },
-];
 
 describe("CustomerTable Component", () => {
   it("renders 'No Transactions' if no data", () => {
@@ -67,42 +36,6 @@ describe("CustomerTable Component", () => {
     expect(screen.getByText("C1")).toBeInTheDocument();
     expect(screen.getByText("C2")).toBeInTheDocument();
     expect(screen.getByText(/Total Points/i)).toBeInTheDocument();
-  });
-
-  it("displays rounded reward points for fractional values", () => {
-    const testDate = new Date().toISOString();
-
-    useCustomerData.mockReturnValue({
-      customers: [
-        [
-          "C030",
-          {
-            purchases: { June: 120.45 },
-            monthly: { June: 90.9 },
-            total: 90.9,
-            transactions: {
-              June: [
-                {
-                  amount: 120.45,
-                  transactionId: "TXN100",
-                  date: testDate,
-                  points: 90.9,
-                },
-              ],
-            },
-          },
-        ],
-      ],
-      customerMap: {},
-    });
-
-    render(<CustomerTable data={[]} selectedMonth="" selectedYear={new Date().getFullYear()} />);
-
-    // ✅ More reliable matcher for split-node structure
-    expect(screen.getAllByText((_, element) => element?.textContent?.replace(/\s+/g, "").includes("June:91")).length).toBeGreaterThanOrEqual(1);
-
-    // ✅ Total points check
-    expect(screen.getAllByText("91").length).toBeGreaterThanOrEqual(2);
   });
 
   it("expands transaction list when ➕ is clicked", async () => {
@@ -164,5 +97,27 @@ describe("CustomerTable Component", () => {
     for (let i = 6; i <= 8; i++) {
       expect(screen.getByText(`C${i}`)).toBeInTheDocument();
     }
+  });
+  it("should return rewards points for purchases", () => {
+    const testCases = [
+      { amount: 120, expected: 90 },
+      { amount: 200, expected: 250 },
+      { amount: 90, expected: 40 },
+      { amount: 40, expected: 0 },
+    ];
+
+    testCases.forEach(({ amount, expected }) => {
+      expect(calculatePoints(amount)).toBe(expected);
+    });
+  });
+  it("should return rewards points for fraction amount purchases", () => {
+    const testCases = [
+      { amount: 120.45, expected: 91 },
+      { amount: 220.3, expected: 291 },
+      { amount: 65.45, expected: 15 },
+    ];
+    testCases.forEach(({ amount, expected }) => {
+      expect(calculatePoints(amount)).toBe(expected);
+    });
   });
 });
